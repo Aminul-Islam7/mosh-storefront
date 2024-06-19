@@ -8,10 +8,27 @@ from django.urls import reverse
 from . import models
 
 
+class InventoryFilter(admin.SimpleListFilter):
+    LOW_FILTER = '<10'
+
+    title = 'inventory'
+    parameter_name = 'inventory'
+
+    def lookups(self, request, model_admin):
+        return [
+            (self.LOW_FILTER, 'Low')
+        ]
+
+    def queryset(self, request, queryset: QuerySet):
+        if self.value() == self.LOW_FILTER:
+            return queryset.filter(inventory__lt=10)
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
     list_editable = ['unit_price']
+    list_filter = ['collection', 'last_update', InventoryFilter]
     list_per_page = 10
     list_select_related = ['collection']
 
@@ -21,7 +38,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     @admin.display(ordering='inventory')
     def inventory_status(self, product):
-        return 'Low' if product.inventory < 10 else 'Okay'
+        return 'Low' if product.inventory < 10 else 'OK'
 
 
 @admin.register(models.Customer)
