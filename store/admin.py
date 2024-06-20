@@ -34,6 +34,7 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {
         'slug': ['title']
     }
+    search_fields = ['title']
 
     @admin.display(ordering='collection')
     def collection_title(self, product):
@@ -78,9 +79,19 @@ class CustomerAdmin(admin.ModelAdmin):
         )
 
 
+class OrderItemInline(admin.TabularInline):
+    model = models.OrderItem
+
+    autocomplete_fields = ['product']
+    min_num = 1
+    max_num = 25
+    extra = 0
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
     autocomplete_fields = ['customer']
+    inlines = [OrderItemInline]
     list_display = ['id', 'placed_at', 'customer']
     ordering = ['id']
     list_per_page = 10
